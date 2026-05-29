@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #05070d;
+  --foreground: #e6eaf2;
+
+  --card: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --primary: #3b82f6;
+  --accent: #22c55e;
+}
+
+body {
+  background: radial-gradient(circle at top, #0b1220, #05070d 60%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+/* Glass card */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* Input */
+.input {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  border-radius: 10px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+/* Button */
+.btn {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.btn-green:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
