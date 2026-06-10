@@ -25,7 +25,7 @@ export default function Home() {
       setData(updatedData)
       setEditIndex(null)
     } else {
-      setData([...data, { ...form, total_blast: 0, respon_angka: "", status: "limit", login: false }])
+      setData([...data, { ...form, total_blast: 0, respon_angka: "", keterangan: "manual", status: "limit", login: false }])
     }
     setForm({ id: "", password: "", kode: "", type: "hari_ini", dari: "@Gcrpra" })
   }
@@ -55,7 +55,7 @@ export default function Home() {
             id: idMatch[1].trim(),
             password: passMatch ? passMatch[1].trim() : "",
             kode: faMatch[1].replace(/\n/g, " ").trim(),
-            total_blast: 0, respon_angka: "", status: "limit", login: false
+            total_blast: 0, respon_angka: "", keterangan: "manual", status: "limit", login: false
           })
         }
       })
@@ -77,7 +77,7 @@ export default function Home() {
               id: id,
               password: password,
               kode: kode,
-              total_blast: 0, respon_angka: "", status: "limit", login: false
+              total_blast: 0, respon_angka: "", keterangan: "manual", status: "limit", login: false
             })
           }
         }
@@ -106,13 +106,13 @@ export default function Home() {
     const formatHariIni = hariIni.map(d => { 
       const blastCount = d.total_blast || 0
       totalHariIni += blastCount
-      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || ""}` 
+      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nKeterangan = ${d.keterangan || "manual"}\nRespon = ${d.respon_angka || ""}` 
     }).join("\n\n")
 
     const formatKemarin = kemarin.map(d => { 
       const blastCount = d.total_blast || 0
       totalKemarin += blastCount
-      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || ""}` 
+      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nKeterangan = ${d.keterangan || "manual"}\nRespon = ${d.respon_angka || ""}` 
     }).join("\n\n")
 
     let reportOutput = `DIMAS\n${today}\nReal Time ${timeNow}\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
@@ -187,6 +187,13 @@ export default function Home() {
                         <option value="limit">LIMIT</option><option value="suspend">SUSPEND</option><option value="blokir">BLOKIR</option><option value="dibatasi">DIBATASI</option>
                       </select>
                     </div>
+                    {/* DROP DOWN KETERANGAN */}
+                    <div className="inline-group">
+                      <select value={item.keterangan || "manual"} onChange={(e) => { const newData = [...data]; newData[realIndex].keterangan = e.target.value; setData(newData); }}>
+                        <option value="manual">manual</option>
+                        <option value="sender">sender</option>
+                      </select>
+                    </div>
                     <div className="inline-group">
                       <select value={item.type} onChange={(e) => { const newData = [...data]; newData[realIndex].type = e.target.value; setData(newData); }}>
                         <option value="hari_ini">FP Hari Ini</option><option value="kemarin">FP Kemarin</option>
@@ -201,7 +208,7 @@ export default function Home() {
                       <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.kode)}>KODE</button>
                       <button className="btn-sm btn3d blue" onClick={() => handleEdit(realIndex)}>EDIT</button>
                       <button className="btn-sm btn3d" onClick={() => { const txt = `${item.id}\nStatus : ${item.status} (${item.total_blast})\nDari : ${item.dari}`; navigator.clipboard.writeText(txt) }}>REPORT</button>
-                      <button className={`btn-sm btn3d ${item.login ? "green" : "red"}`} onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
+                      <button className="btn-sm btn3d ${item.login ? 'green' : 'red'}" onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
                       <button className="btn-sm btn3d red" onClick={() => setData(data.filter((_, idx) => idx !== realIndex))}>DEL</button>
                     </div>
                   </div>
@@ -230,6 +237,13 @@ export default function Home() {
                         <option value="limit">LIMIT</option><option value="suspend">SUSPEND</option><option value="blokir">BLOKIR</option><option value="dibatasi">DIBATASI</option>
                       </select>
                     </div>
+                    {/* DROP DOWN KETERANGAN */}
+                    <div className="inline-group">
+                      <select value={item.keterangan || "manual"} onChange={(e) => { const newData = [...data]; newData[realIndex].keterangan = e.target.value; setData(newData); }}>
+                        <option value="manual">manual</option>
+                        <option value="sender">sender</option>
+                      </select>
+                    </div>
                     <div className="inline-group">
                       <select value={item.type} onChange={(e) => { const newData = [...data]; newData[realIndex].type = e.target.value; setData(newData); }}>
                         <option value="hari_ini">FP Hari Ini</option><option value="kemarin">FP Kemarin</option>
@@ -244,7 +258,7 @@ export default function Home() {
                       <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.kode)}>KODE</button>
                       <button className="btn-sm btn3d blue" onClick={() => handleEdit(realIndex)}>EDIT</button>
                       <button className="btn-sm btn3d" onClick={() => { const txt = `${item.id}\nStatus : ${item.status} (${item.total_blast})\nDari : ${item.dari}`; navigator.clipboard.writeText(txt) }}>REPORT</button>
-                      <button className={`btn-sm btn3d ${item.login ? "green" : "red"}`} onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
+                      <button className="btn-sm btn3d ${item.login ? 'green' : 'red'}" onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
                       <button className="btn-sm btn3d red" onClick={() => setData(data.filter((_, idx) => idx !== realIndex))}>DEL</button>
                     </div>
                   </div>
@@ -275,25 +289,3 @@ export default function Home() {
 
         .main { padding:30px; background:#020617; min-height:100vh; color:white }
         .title { text-align:center; margin-bottom:30px; font-size:48px; font-weight:900; background: linear-gradient(90deg,#22d3ee,#3b82f6,#22d3ee); background-size:200%; -webkit-background-clip:text; color:transparent; animation: glow 5s linear infinite; }
-        @keyframes glow { 0%{background-position:0%} 100%{background-position:200%} }
-        .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px }
-        .card { background:rgba(255,255,255,0.04); padding:22px; border-radius:18px; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
-        input, select, textarea { width:100%; padding:12px; margin-top:12px; border-radius:12px; background:#0f172a; color:white; border: 1px solid rgba(255,255,255,0.1); }
-        .inline-group { display: flex; gap: 10px; margin-top: 5px; }
-        .inline-group input, .inline-group select { margin-top: 8px; }
-        textarea { height:240px }
-        .btn { margin-top:14px; padding:12px; border-radius:12px; background:linear-gradient(#22c55e,#15803d); box-shadow:0 5px 0 #14532d; }
-        .btn:active { transform:translateY(3px); box-shadow:0 1px 0 #14532d; }
-        .btn-sm { padding:7px 12px; border-radius:10px; background:#1f2937; box-shadow:0 4px 0 #111; }
-        .btn3d:active { transform:translateY(3px); box-shadow:0 1px 0 #111; }
-        .btn-row { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
-        .quick-box { margin-top:22px }
-        .generate-box { margin-top:30px }
-        .list-box { margin-top:14px; padding:14px; border-radius:14px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.08); }
-        .list-header { display:flex; justify-content:space-between; cursor:pointer; font-weight:600; }
-        .list-body { margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px; }
-        .green { background:#22c55e } .red { background:#ef4444 } .blue { background:#3b82f6 }
-      `}</style>
-    </div>
-  )
-}
