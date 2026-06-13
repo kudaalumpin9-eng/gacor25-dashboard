@@ -17,9 +17,6 @@ export default function Home() {
     dari: "@Gcrpra"
   })
 
-  // List opsi status bawaan untuk validasi value dropdown
-  const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
-
   const handleSave = () => {
     if (!form.id) return alert("ID wajib diisi")
     if (editIndex !== null) {
@@ -146,6 +143,9 @@ export default function Home() {
     setData(newData)
   }
 
+  // List opsi status bawaan untuk validasi value dropdown
+  const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
+
   return (
     <div className="main">
       <h1 className="title">DASHBOARD GACOR25 X OKE25</h1>
@@ -231,4 +231,118 @@ export default function Home() {
                     <div className="btn-row">
                       <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.id)}>ID</button>
                       <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.password)}>PASS</button>
-                      <button className="btn-sm btn3d" onClick={()
+                      <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.kode)}>KODE</button>
+                      <button className="btn-sm btn3d blue" onClick={() => handleEdit(realIndex)}>EDIT</button>
+                      <button className="btn-sm btn3d" onClick={() => { const txt = `${item.id}\nStatus : ${item.status} (${item.total_blast})\nDari : ${item.dari}`; navigator.clipboard.writeText(txt) }}>REPORT</button>
+                      <button className={`btn-sm btn3d ${item.login ? "green" : "red"}`} onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
+                      <button className="btn-sm btn3d red" onClick={() => setData(data.filter((_, idx) => idx !== realIndex))}>DEL</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+          <hr style={{ margin: "20px 0", opacity: 0.2 }} />
+          <h2>FP KEMARIN</h2>
+          {data.filter(d => d.type === "kemarin").map((item) => {
+            const realIndex = data.findIndex(d => d === item)
+            return (
+              <div key={realIndex} className="list-box">
+                <div className="list-header" onClick={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}>
+                  <span>#{realIndex + 1} - {item.id} // {item.total_blast || 0} // {item.status?.toUpperCase()}</span>
+                  <span>{openIndex === realIndex ? "▲" : "▼"}</span>
+                </div>
+                {openIndex === realIndex && (
+                  <div className="list-body">
+                    <p>PASS: {item.password}</p>
+                    <p>KODE: {item.kode}</p>
+                    <div className="inline-group">
+                      <input type="number" placeholder="Total Blast" value={item.total_blast} onChange={(e) => { const newData = [...data]; newData[realIndex].total_blast = Number(e.target.value); setData(newData); }} />
+                      <input type="text" placeholder="Respon" value={item.respon_angka || ""} onChange={(e) => { const newData = [...data]; newData[realIndex].respon_angka = e.target.value; setData(newData); }} />
+                      <select value={defaultStatuses.includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
+                        <option value="limit">LIMIT</option>
+                        <option value="suspend">SUSPEND</option>
+                        <option value="blokir">BLOKIR</option>
+                        <option value="dibatasi">DIBATASI</option>
+                        <option value="tidak bisa di gunakan">TIDAK BISA DI GUNAKAN</option>
+                        <option value="custom">{defaultStatuses.includes(item.status) ? "Isi sendiri..." : item.status}</option>
+                      </select>
+                    </div>
+                    {/* DROP DOWN KETERANGAN */}
+                    <div className="inline-group">
+                      <select value={["manual", "sender", "ip"].includes(item.keterangan) ? item.keterangan : "custom"} onChange={(e) => handleDropdownChange(realIndex, "keterangan", e.target.value)}>
+                        <option value="manual">manual</option>
+                        <option value="sender">sender</option>
+                        <option value="ip">IP</option>
+                        <option value="custom">{["manual", "sender", "ip"].includes(item.keterangan) ? "Isi sendiri..." : item.keterangan}</option>
+                      </select>
+                    </div>
+                    <div className="inline-group">
+                      <select value={item.type} onChange={(e) => { const newData = [...data]; newData[realIndex].type = e.target.value; setData(newData); }}>
+                        <option value="hari_ini">FP Hari Ini</option><option value="kemarin">FP Kemarin</option>
+                      </select>
+                      <select value={["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? item.dari : "custom"} onChange={(e) => handleDropdownChange(realIndex, "dari", e.target.value)}>
+                        <option value="@Gcrpra">@Gcrpra</option>
+                        <option value="@mandiluuuu">@mandiluuuu</option>
+                        <option value="custom">{["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? "Isi sendiri..." : item.dari}</option>
+                      </select>
+                    </div>
+                    <div className="btn-row">
+                      <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.id)}>ID</button>
+                      <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.password)}>PASS</button>
+                      <button className="btn-sm btn3d" onClick={() => navigator.clipboard.writeText(item.kode)}>KODE</button>
+                      <button className="btn-sm btn3d blue" onClick={() => handleEdit(realIndex)}>EDIT</button>
+                      <button className="btn-sm btn3d" onClick={() => { const txt = `${item.id}\nStatus : ${item.status} (${item.total_blast})\nDari : ${item.dari}`; navigator.clipboard.writeText(txt) }}>REPORT</button>
+                      <button className={`btn-sm btn3d ${item.login ? "green" : "red"}`} onClick={() => { const newData = [...data]; newData[realIndex].login = !newData[realIndex].login; setData(newData); }}>{item.login ? "LOGIN" : "LOGOUT"}</button>
+                      <button className="btn-sm btn3d red" onClick={() => setData(data.filter((_, idx) => idx !== realIndex))}>DEL</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      <style jsx>{`
+        /* CUSTOM SCROLLBAR - LEBIH TEBAL */
+        :global(::-webkit-scrollbar) {
+          width: 12px;
+          height: 12px;
+        }
+        :global(::-webkit-scrollbar-track) {
+          background: #0f172a;
+          border-radius: 10px;
+        }
+        :global(::-webkit-scrollbar-thumb) {
+          background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+          border-radius: 10px;
+          border: 2px solid #0f172a;
+        }
+        :global(::-webkit-scrollbar-thumb:hover) {
+          background: linear-gradient(180deg, #60a5fa, #2563eb);
+        }
+
+        .main { padding:30px; background:#020617; min-height:100vh; color:white }
+        .title { text-align:center; margin-bottom:30px; font-size:48px; font-weight:900; background: linear-gradient(90deg,#22d3ee,#3b82f6,#22d3ee); background-size:200%; -webkit-background-clip:text; color:transparent; animation: glow 5s linear infinite; }
+        @keyframes glow { 0%{background-position:0%} 100%{background-position:200%} }
+        .grid { display:grid; grid-template-columns:1fr 1fr; gap:24px }
+        .card { background:rgba(255,255,255,0.04); padding:22px; border-radius:18px; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+        input, select, textarea { width:100%; padding:12px; margin-top:12px; border-radius:12px; background:#0f172a; color:white; border: 1px solid rgba(255,255,255,0.1); }
+        .inline-group { display: flex; gap: 10px; margin-top: 5px; }
+        .inline-group input, .inline-group select { margin-top: 8px; }
+        textarea { height:240px }
+        .btn { margin-top:14px; padding:12px; border-radius:12px; background:linear-gradient(#22c55e,#15803d); box-shadow:0 5px 0 #14532d; }
+        .btn:active { transform:translateY(3px); box-shadow:0 1px 0 #14532d; }
+        .btn-sm { padding:7px 12px; border-radius:10px; background:#1f2937; box-shadow:0 4px 0 #111; }
+        .btn3d:active { transform:translateY(3px); box-shadow:0 1px 0 #111; }
+        .btn-row { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+        .quick-box { margin-top:22px }
+        .generate-box { margin-top:30px }
+        .list-box { margin-top:14px; padding:14px; border-radius:14px; background:rgba(0,0,0,0.45); border:1px solid rgba(255,255,255,0.08); }
+        .list-header { display:flex; justify-content:space-between; cursor:pointer; font-weight:600; }
+        .list-body { margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px; }
+        .green { background:#22c55e } .red { background:#ef4444 } .blue { background:#3b82f6 }
+      `}</style>
+    </div>
+  )
+}
