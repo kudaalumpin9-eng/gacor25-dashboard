@@ -1,3 +1,8 @@
+Berikut adalah perubahan pada kode komponen Anda. Opsi **"TIDAK BISA DI GUNAKAN"** telah ditambahkan ke dalam dropdown status (baik untuk bagian FP Hari Ini maupun FP Kemarin) serta logika penanganannya agar opsi "Isi sendiri..." tetap berfungsi dengan normal.
+
+### Kode Lengkap Terupdate
+
+```tsx
 "use client"
 import { useState } from "react"
 
@@ -102,7 +107,6 @@ export default function Home() {
     let totalHariIni = 0
     let totalKemarin = 0
 
-    // Mengambil info pengirim dari data pertama yang tersedia (default ke "DIMAS" jika kosong)
     const namaPengirim = data[0]?.dari || "DIMAS"
 
     const formatHariIni = hariIni.map((d, index) => { 
@@ -131,7 +135,6 @@ export default function Home() {
     setReportText(reportOutput)
   }
 
-  // Fungsi pembantu untuk handle opsi "isi sendiri" pada dropdown di list item
   const handleDropdownChange = (realIndex: number, field: string, val: string) => {
     const newData = [...data]
     if (val === "custom") {
@@ -144,6 +147,9 @@ export default function Home() {
     }
     setData(newData)
   }
+
+  // List opsi status bawaan untuk validasi value dropdown
+  const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
 
   return (
     <div className="main">
@@ -189,7 +195,7 @@ export default function Home() {
             return (
               <div key={realIndex} className="list-box">
                 <div className="list-header" onClick={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}>
-                  <span>#{realIndex + 1} - {item.id} // {item.total_blast || 0} // {item.status}</span>
+                  <span>#{realIndex + 1} - {item.id} // {item.total_blast || 0} // {item.status?.toUpperCase()}</span>
                   <span>{openIndex === realIndex ? "▲" : "▼"}</span>
                 </div>
                 {openIndex === realIndex && (
@@ -199,12 +205,13 @@ export default function Home() {
                     <div className="inline-group">
                       <input type="number" placeholder="Total Blast" value={item.total_blast} onChange={(e) => { const newData = [...data]; newData[realIndex].total_blast = Number(e.target.value); setData(newData); }} />
                       <input type="text" placeholder="Respon" value={item.respon_angka || ""} onChange={(e) => { const newData = [...data]; newData[realIndex].respon_angka = e.target.value; setData(newData); }} />
-                      <select value={["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
+                      <select value={defaultStatuses.includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
                         <option value="limit">LIMIT</option>
                         <option value="suspend">SUSPEND</option>
                         <option value="blokir">BLOKIR</option>
                         <option value="dibatasi">DIBATASI</option>
-                        <option value="custom">{["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? "Isi sendiri..." : item.status}</option>
+                        <option value="tidak bisa di gunakan">TIDAK BISA DI GUNAKAN</option>
+                        <option value="custom">{defaultStatuses.includes(item.status) ? "Isi sendiri..." : item.status}</option>
                       </select>
                     </div>
                     {/* DROP DOWN KETERANGAN */}
@@ -247,7 +254,7 @@ export default function Home() {
             return (
               <div key={realIndex} className="list-box">
                 <div className="list-header" onClick={() => setOpenIndex(openIndex === realIndex ? null : realIndex)}>
-                  <span>#{realIndex + 1} - {item.id} // {item.total_blast || 0} // {item.status}</span>
+                  <span>#{realIndex + 1} - {item.id} // {item.total_blast || 0} // {item.status?.toUpperCase()}</span>
                   <span>{openIndex === realIndex ? "▲" : "▼"}</span>
                 </div>
                 {openIndex === realIndex && (
@@ -257,12 +264,13 @@ export default function Home() {
                     <div className="inline-group">
                       <input type="number" placeholder="Total Blast" value={item.total_blast} onChange={(e) => { const newData = [...data]; newData[realIndex].total_blast = Number(e.target.value); setData(newData); }} />
                       <input type="text" placeholder="Respon" value={item.respon_angka || ""} onChange={(e) => { const newData = [...data]; newData[realIndex].respon_angka = e.target.value; setData(newData); }} />
-                      <select value={["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
+                      <select value={defaultStatuses.includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
                         <option value="limit">LIMIT</option>
                         <option value="suspend">SUSPEND</option>
                         <option value="blokir">BLOKIR</option>
                         <option value="dibatasi">DIBATASI</option>
-                        <option value="custom">{["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? "Isi sendiri..." : item.status}</option>
+                        <option value="tidak bisa di gunakan">TIDAK BISA DI GUNAKAN</option>
+                        <option value="custom">{defaultStatuses.includes(item.status) ? "Isi sendiri..." : item.status}</option>
                       </select>
                     </div>
                     {/* DROP DOWN KETERANGAN */}
@@ -343,3 +351,5 @@ export default function Home() {
     </div>
   )
 }
+
+```
