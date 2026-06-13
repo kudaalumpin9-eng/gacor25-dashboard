@@ -95,7 +95,6 @@ export default function Home() {
 
   const handleGenerate = () => {
     const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-    const timeNow = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", hour12: false }).replace(/\./g, ':')
 
     const hariIni = data.filter(d => d.type === "hari_ini")
     const kemarin = data.filter(d => d.type === "kemarin")
@@ -103,19 +102,22 @@ export default function Home() {
     let totalHariIni = 0
     let totalKemarin = 0
 
-    const formatHariIni = hariIni.map(d => { 
+    // Mengambil info pengirim dari data pertama yang tersedia (default ke "DIMAS" jika kosong)
+    const namaPengirim = data[0]?.dari || "DIMAS"
+
+    const formatHariIni = hariIni.map((d, index) => { 
       const blastCount = d.total_blast || 0
       totalHariIni += blastCount
-      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nKeterangan = ${d.keterangan || "manual"}\nRespon = ${d.respon_angka || ""}` 
+      return `${index + 1}. User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || "0"}\nketerangan = ${d.keterangan || "manual"}` 
     }).join("\n\n")
 
-    const formatKemarin = kemarin.map(d => { 
+    const formatKemarin = kemarin.map((d, index) => { 
       const blastCount = d.total_blast || 0
       totalKemarin += blastCount
-      return `User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nKeterangan = ${d.keterangan || "manual"}\nRespon = ${d.respon_angka || ""}` 
+      return `${index + 1}. User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || "0"}\nketerangan = ${d.keterangan || "manual"}` 
     }).join("\n\n")
 
-    let reportOutput = `DIMAS\n${today}\nReal Time ${timeNow}\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
+    let reportOutput = `${today}\nRealtime / report harian\nNama : ${namaPengirim} (FP dari ${namaPengirim})\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
 
     if (kemarin.length > 0) {
       reportOutput += `\n\n==========================\n\nFP Kemarin :\n\n${formatKemarin}\n\nTotal blast = ${totalKemarin}`
@@ -127,6 +129,20 @@ export default function Home() {
     }
 
     setReportText(reportOutput)
+  }
+
+  // Fungsi pembantu untuk handle opsi "isi sendiri" pada dropdown di list item
+  const handleDropdownChange = (realIndex: number, field: string, val: string) => {
+    const newData = [...data]
+    if (val === "custom") {
+      const customValue = window.prompt(`Masukkan ${field} kustom anda:`)
+      if (customValue !== null && customValue.trim() !== "") {
+        newData[realIndex][field] = customValue.trim()
+      }
+    } else {
+      newData[realIndex][field] = val
+    }
+    setData(newData)
   }
 
   return (
@@ -183,23 +199,31 @@ export default function Home() {
                     <div className="inline-group">
                       <input type="number" placeholder="Total Blast" value={item.total_blast} onChange={(e) => { const newData = [...data]; newData[realIndex].total_blast = Number(e.target.value); setData(newData); }} />
                       <input type="text" placeholder="Respon" value={item.respon_angka || ""} onChange={(e) => { const newData = [...data]; newData[realIndex].respon_angka = e.target.value; setData(newData); }} />
-                      <select value={item.status} onChange={(e) => { const newData = [...data]; newData[realIndex].status = e.target.value; setData(newData); }}>
-                        <option value="limit">LIMIT</option><option value="suspend">SUSPEND</option><option value="blokir">BLOKIR</option><option value="dibatasi">DIBATASI</option>
+                      <select value={["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
+                        <option value="limit">LIMIT</option>
+                        <option value="suspend">SUSPEND</option>
+                        <option value="blokir">BLOKIR</option>
+                        <option value="dibatasi">DIBATASI</option>
+                        <option value="custom">{["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? "Isi sendiri..." : item.status}</option>
                       </select>
                     </div>
                     {/* DROP DOWN KETERANGAN */}
                     <div className="inline-group">
-                      <select value={item.keterangan || "manual"} onChange={(e) => { const newData = [...data]; newData[realIndex].keterangan = e.target.value; setData(newData); }}>
+                      <select value={["manual", "sender", "ip"].includes(item.keterangan) ? item.keterangan : "custom"} onChange={(e) => handleDropdownChange(realIndex, "keterangan", e.target.value)}>
                         <option value="manual">manual</option>
                         <option value="sender">sender</option>
+                        <option value="ip">IP</option>
+                        <option value="custom">{["manual", "sender", "ip"].includes(item.keterangan) ? "Isi sendiri..." : item.keterangan}</option>
                       </select>
                     </div>
                     <div className="inline-group">
                       <select value={item.type} onChange={(e) => { const newData = [...data]; newData[realIndex].type = e.target.value; setData(newData); }}>
                         <option value="hari_ini">FP Hari Ini</option><option value="kemarin">FP Kemarin</option>
                       </select>
-                      <select value={item.dari} onChange={(e) => { const newData = [...data]; newData[realIndex].dari = e.target.value; setData(newData); }}>
-                        <option>@Gcrpra</option><option>@mandiluuuu</option><option value="custom">Isi sendiri</option>
+                      <select value={["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? item.dari : "custom"} onChange={(e) => handleDropdownChange(realIndex, "dari", e.target.value)}>
+                        <option value="@Gcrpra">@Gcrpra</option>
+                        <option value="@mandiluuuu">@mandiluuuu</option>
+                        <option value="custom">{["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? "Isi sendiri..." : item.dari}</option>
                       </select>
                     </div>
                     <div className="btn-row">
@@ -233,23 +257,31 @@ export default function Home() {
                     <div className="inline-group">
                       <input type="number" placeholder="Total Blast" value={item.total_blast} onChange={(e) => { const newData = [...data]; newData[realIndex].total_blast = Number(e.target.value); setData(newData); }} />
                       <input type="text" placeholder="Respon" value={item.respon_angka || ""} onChange={(e) => { const newData = [...data]; newData[realIndex].respon_angka = e.target.value; setData(newData); }} />
-                      <select value={item.status} onChange={(e) => { const newData = [...data]; newData[realIndex].status = e.target.value; setData(newData); }}>
-                        <option value="limit">LIMIT</option><option value="suspend">SUSPEND</option><option value="blokir">BLOKIR</option><option value="dibatasi">DIBATASI</option>
+                      <select value={["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? item.status : "custom"} onChange={(e) => handleDropdownChange(realIndex, "status", e.target.value)}>
+                        <option value="limit">LIMIT</option>
+                        <option value="suspend">SUSPEND</option>
+                        <option value="blokir">BLOKIR</option>
+                        <option value="dibatasi">DIBATASI</option>
+                        <option value="custom">{["limit", "suspend", "blokir", "dibatasi"].includes(item.status) ? "Isi sendiri..." : item.status}</option>
                       </select>
                     </div>
                     {/* DROP DOWN KETERANGAN */}
                     <div className="inline-group">
-                      <select value={item.keterangan || "manual"} onChange={(e) => { const newData = [...data]; newData[realIndex].keterangan = e.target.value; setData(newData); }}>
+                      <select value={["manual", "sender", "ip"].includes(item.keterangan) ? item.keterangan : "custom"} onChange={(e) => handleDropdownChange(realIndex, "keterangan", e.target.value)}>
                         <option value="manual">manual</option>
                         <option value="sender">sender</option>
+                        <option value="ip">IP</option>
+                        <option value="custom">{["manual", "sender", "ip"].includes(item.keterangan) ? "Isi sendiri..." : item.keterangan}</option>
                       </select>
                     </div>
                     <div className="inline-group">
                       <select value={item.type} onChange={(e) => { const newData = [...data]; newData[realIndex].type = e.target.value; setData(newData); }}>
                         <option value="hari_ini">FP Hari Ini</option><option value="kemarin">FP Kemarin</option>
                       </select>
-                      <select value={item.dari} onChange={(e) => { const newData = [...data]; newData[realIndex].dari = e.target.value; setData(newData); }}>
-                        <option>@Gcrpra</option><option>@mandiluuuu</option><option value="custom">Isi sendiri</option>
+                      <select value={["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? item.dari : "custom"} onChange={(e) => handleDropdownChange(realIndex, "dari", e.target.value)}>
+                        <option value="@Gcrpra">@Gcrpra</option>
+                        <option value="@mandiluuuu">@mandiluuuu</option>
+                        <option value="custom">{["@Gcrpra", "@mandiluuuu"].includes(item.dari) ? "Isi sendiri..." : item.dari}</option>
                       </select>
                     </div>
                     <div className="btn-row">
