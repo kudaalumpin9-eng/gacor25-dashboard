@@ -9,7 +9,7 @@ export default function Home() {
   const [quickInput, setQuickInput] = useState("")
   const [editIndex, setEditIndex] = useState<number | null>(null)
   
-  // State baru untuk nama pemeriksa/pengisi report
+  // State untuk nama pemeriksa/pengisi report
   const [checkerName, setCheckerName] = useState("DIMAS RZ")
 
   const [form, setForm] = useState({
@@ -100,40 +100,54 @@ export default function Home() {
   }
 
   const handleGenerate = () => {
-    const today = new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    const now = new Date()
+    const todayStr = now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }).replace(":", ".")
+    
+    const fullDateTime = `${todayStr} ${timeStr}`
 
     const hariIni = data.filter(d => d.type === "hari_ini")
     const kemarin = data.filter(d => d.type === "kemarin")
     
     let totalHariIni = 0
+    let totalResponHariIni = 0
+    
     let totalKemarin = 0
+    let totalResponKemarin = 0
 
-    // Mengambil daftar unik dari field 'dari' yang ada di seluruh data inputan
     const uniqueSources = Array.from(new Set(data.map(d => d.dari).filter(Boolean)))
     const sumberFp = uniqueSources.length > 0 ? uniqueSources.join(", ") : "@Gcrpra"
 
     const formatHariIni = hariIni.map((d, index) => { 
       const blastCount = d.total_blast || 0
+      const responCount = Number(d.respon_angka) || 0
       totalHariIni += blastCount
+      totalResponHariIni += responCount
       return `${index + 1}. User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || "0"}\nketerangan = ${d.keterangan || "manual"}` 
     }).join("\n\n")
 
     const formatKemarin = kemarin.map((d, index) => { 
       const blastCount = d.total_blast || 0
+      const responCount = Number(d.respon_angka) || 0
       totalKemarin += blastCount
+      totalResponKemarin += responCount
       return `${index + 1}. User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || "0"}\nketerangan = ${d.keterangan || "manual"}` 
     }).join("\n\n")
 
-    // Menggunakan checkerName yang dinamis serta list sumberFp hasil gabungan otomatis
-    let reportOutput = `${today}\nRealtime / report harian\nNama : ${checkerName.toUpperCase()} (FP dari ${sumberFp})\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
+    // Output dasar (Hanya total blast untuk Hari Ini)
+    let reportOutput = `${fullDateTime}\nRealtime / report harian\nNama : ${checkerName.toUpperCase()} (FP dari ${sumberFp})\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
 
     if (kemarin.length > 0) {
       reportOutput += `\n\n==========================\n\nFP Kemarin :\n\n${formatKemarin}\n\nTotal blast = ${totalKemarin}`
       
       const grandTotalBlast = totalHariIni + totalKemarin
-      reportOutput += `\n\n==========================\n\ntotal all blast = ${grandTotalBlast}\n\n==========================`
+      const grandTotalRespon = totalResponHariIni + totalResponKemarin
+      
+      // Menampilkan total all blast dan total all respon gabungan di paling bawah
+      reportOutput += `\n\n==========================\n\ntotal all blast = ${grandTotalBlast}\ntotal all respon = ${grandTotalRespon}\n==========================`
     } else {
-      reportOutput += `\n\n==========================`
+      // Jika tidak ada data kemarin, total all respon tetap ditampilkan di paling bawah laporan utama
+      reportOutput += `\n\ntotal all respon = ${totalResponHariIni}\n==========================`
     }
 
     setReportText(reportOutput)
@@ -159,7 +173,7 @@ export default function Home() {
         <div className="card">
           <h2>{editIndex !== null ? "EDIT DATA" : "INPUT DATA"}</h2>
           
-          {/* Tambahan Kolom Input Nama Pemeriksa */}
+          {/* Kolom Input Nama Pemeriksa */}
           <div style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px dashed rgba(255,255,255,0.1)" }}>
             <label style={{ fontSize: "12px", fontWeight: "bold", color: "#3b82f6" }}>NAMA PEMERIKSA / REPORT</label>
             <input placeholder="Isi nama Anda (cth: DIMAS RZ)" value={checkerName} onChange={e => setCheckerName(e.target.value)} style={{ marginTop: "6px", borderColor: "#3b82f6" }} />
