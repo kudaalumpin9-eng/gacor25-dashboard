@@ -8,6 +8,9 @@ export default function Home() {
   const [showQuick, setShowQuick] = useState(false)
   const [quickInput, setQuickInput] = useState("")
   const [editIndex, setEditIndex] = useState<number | null>(null)
+  
+  // State baru untuk nama pemeriksa/pengisi report
+  const [checkerName, setCheckerName] = useState("DIMAS RZ")
 
   const [form, setForm] = useState({
     id: "",
@@ -16,6 +19,9 @@ export default function Home() {
     type: "hari_ini",
     dari: "@Gcrpra"
   })
+
+  // List opsi status bawaan untuk validasi value dropdown
+  const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
 
   const handleSave = () => {
     if (!form.id) return alert("ID wajib diisi")
@@ -102,7 +108,9 @@ export default function Home() {
     let totalHariIni = 0
     let totalKemarin = 0
 
-    const namaPengirim = data[0]?.dari || "DIMAS"
+    // Mengambil daftar unik dari field 'dari' yang ada di seluruh data inputan
+    const uniqueSources = Array.from(new Set(data.map(d => d.dari).filter(Boolean)))
+    const sumberFp = uniqueSources.length > 0 ? uniqueSources.join(", ") : "@Gcrpra"
 
     const formatHariIni = hariIni.map((d, index) => { 
       const blastCount = d.total_blast || 0
@@ -116,7 +124,8 @@ export default function Home() {
       return `${index + 1}. User Fp = ${d.id} / ${d.status?.toUpperCase()}\nTotal Blast = ${blastCount}\nRespon = ${d.respon_angka || "0"}\nketerangan = ${d.keterangan || "manual"}` 
     }).join("\n\n")
 
-    let reportOutput = `${today}\nRealtime / report harian\nNama : ${namaPengirim} (FP dari ${namaPengirim})\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
+    // Menggunakan checkerName yang dinamis serta list sumberFp hasil gabungan otomatis
+    let reportOutput = `${today}\nRealtime / report harian\nNama : ${checkerName.toUpperCase()} (FP dari ${sumberFp})\n\nFP Hari Ini :\n\n${formatHariIni || "Tidak ada data"}\n\nTotal blast = ${totalHariIni}`
 
     if (kemarin.length > 0) {
       reportOutput += `\n\n==========================\n\nFP Kemarin :\n\n${formatKemarin}\n\nTotal blast = ${totalKemarin}`
@@ -143,15 +152,19 @@ export default function Home() {
     setData(newData)
   }
 
-  // List opsi status bawaan untuk validasi value dropdown
-  const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
-
   return (
     <div className="main">
       <h1 className="title">DASHBOARD GACOR25 X OKE25</h1>
       <div className="grid">
         <div className="card">
           <h2>{editIndex !== null ? "EDIT DATA" : "INPUT DATA"}</h2>
+          
+          {/* Tambahan Kolom Input Nama Pemeriksa */}
+          <div style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px dashed rgba(255,255,255,0.1)" }}>
+            <label style={{ fontSize: "12px", fontWeight: "bold", color: "#3b82f6" }}>NAMA PEMERIKSA / REPORT</label>
+            <input placeholder="Isi nama Anda (cth: DIMAS RZ)" value={checkerName} onChange={e => setCheckerName(e.target.value)} style={{ marginTop: "6px", borderColor: "#3b82f6" }} />
+          </div>
+
           <input placeholder="ID" value={form.id} onChange={e => setForm({ ...form, id: e.target.value })} />
           <input placeholder="Password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
           <input placeholder="Kode 2FA" value={form.kode} onChange={e => setForm({ ...form, kode: e.target.value })} />
