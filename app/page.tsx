@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function Home() {
   const [data, setData] = useState<any[]>([])
@@ -22,6 +22,41 @@ export default function Home() {
 
   // List opsi status bawaan untuk validasi value dropdown
   const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
+
+  // ==========================================
+  // [MODIFIKASI] LOGIKA LOCALSTORAGE AUTOSAVE
+  // ==========================================
+  
+  // 1. Ambil data dari localStorage saat komponen pertama kali dimuat
+  useEffect(() => {
+    const savedData = localStorage.getItem("gacor_dashboard_data")
+    const savedCheckerName = localStorage.getItem("gacor_checker_name")
+    
+    if (savedData) {
+      try {
+        setData(JSON.parse(savedData))
+      } catch (e) {
+        console.error("Gagal memuat data dari localStorage", e)
+      }
+    }
+    if (savedCheckerName) {
+      setCheckerName(savedCheckerName)
+    }
+  }, [])
+
+  // 2. Simpan data otomatis setiap kali state 'data' berubah
+  useEffect(() => {
+    if (data.length > 0 || localStorage.getItem("gacor_dashboard_data")) {
+      localStorage.setItem("gacor_dashboard_data", JSON.stringify(data))
+    }
+  }, [data])
+
+  // 3. Simpan nama pemeriksa otomatis setiap kali 'checkerName' berubah
+  useEffect(() => {
+    localStorage.setItem("gacor_checker_name", checkerName)
+  }, [checkerName])
+
+  // ==========================================
 
   const handleSave = () => {
     if (!form.id) return alert("ID wajib diisi")
