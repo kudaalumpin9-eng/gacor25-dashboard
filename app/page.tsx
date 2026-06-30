@@ -23,9 +23,9 @@ export default function Home() {
   // List opsi status bawaan untuk validasi value dropdown
   const defaultStatuses = ["limit", "suspend", "blokir", "dibatasi", "tidak bisa di gunakan"];
 
-  // ==========================================
-  // [MODIFIKASI] LOGIKA LOCALSTORAGE AUTOSAVE
-  // ==========================================
+  // ===================================================
+  // [MODIFIKASI] LOGIKA LOCALSTORAGE & SINKRONISASI TAB
+  // ===================================================
   
   // 1. Ambil data dari localStorage saat komponen pertama kali dimuat
   useEffect(() => {
@@ -42,6 +42,23 @@ export default function Home() {
     if (savedCheckerName) {
       setCheckerName(savedCheckerName)
     }
+
+    // LISTENER UNTUK SINKRONISASI REAL-TIME ANTAR TAB
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "gacor_dashboard_data" && e.newValue) {
+        try {
+          setData(JSON.parse(e.newValue))
+        } catch (err) {
+          console.error("Gagal sinkronisasi data antar tab", err)
+        }
+      }
+      if (e.key === "gacor_checker_name" && e.newValue) {
+        setCheckerName(e.newValue)
+      }
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
 
   // 2. Simpan data otomatis setiap kali state 'data' berubah
@@ -56,7 +73,7 @@ export default function Home() {
     localStorage.setItem("gacor_checker_name", checkerName)
   }, [checkerName])
 
-  // ==========================================
+  // ===================================================
 
   const handleSave = () => {
     if (!form.id) return alert("ID wajib diisi")
